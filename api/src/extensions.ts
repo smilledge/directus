@@ -163,21 +163,26 @@ function registerHooks(hooks: Extension[]) {
 
 		const register = getModuleDefault(hookInstance);
 
-		const events = register({ services, exceptions, env, database: getDatabase(), logger, getSchema });
-
-		for (const [event, handler] of Object.entries(events)) {
-			if (event.startsWith('cron(')) {
-				const cron = event.match(/\(([^)]+)\)/)?.[1];
-
-				if (!cron || validate(cron) === false) {
-					logger.warn(`Couldn't register cron hook. Provided cron is invalid: ${cron}`);
-				} else {
+		const registerFunctions = {
+			filter: (event: string, handler: (...values: any[]) => any[]) => {
+				emitter.onFilter(event, handler);
+			},
+			action: (event: string, handler: (...values: any[]) => void) => {
+				emitter.onAction(event, handler);
+			},
+			init: (event: string, handler: (...values: any[]) => void) => {
+				emitter.onInit(event, handler);
+			},
+			schedule: (cron: string, handler: () => void) => {
+				if (validate(cron)) {
 					schedule(cron, handler);
+				} else {
+					logger.warn(`Couldn't register cron hook. Provided cron is invalid: ${cron}`);
 				}
-			} else {
-				emitter.on(event, handler);
-			}
-		}
+			},
+		};
+
+		register(registerFunctions, { services, exceptions, env, database: getDatabase(), logger, getSchema });
 	}
 }
 

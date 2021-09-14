@@ -5,7 +5,7 @@ import ms from 'ms';
 import { nanoid } from 'nanoid';
 import { authenticator } from 'otplib';
 import getDatabase from '../database';
-import emitter, { emitAsyncSafe } from '../emitter';
+import emitter from '../emitter';
 import env from '../env';
 import {
 	InvalidCredentialsException,
@@ -71,8 +71,8 @@ export class AuthenticationService {
 			.whereRaw('LOWER(??) = ?', ['email', email.toLowerCase()])
 			.first();
 
-		const updatedOptions = await emitter.emitAsync('auth.login.before', options, {
-			event: 'auth.login.before',
+		const updatedOptions = await emitter.emitFilter('auth.login', options, {
+			event: 'auth.login',
 			action: 'login',
 			schema: this.schema,
 			payload: options,
@@ -87,7 +87,7 @@ export class AuthenticationService {
 		}
 
 		const emitStatus = (status: 'fail' | 'success') => {
-			emitAsyncSafe('auth.login', options, {
+			emitter.emitAction('auth.login', options, {
 				event: 'auth.login',
 				action: 'login',
 				schema: this.schema,
