@@ -15,7 +15,7 @@ import { RouteNotFoundException } from '../exceptions';
  */
 const notFound: RequestHandler = async (req, res, next) => {
 	try {
-		const hooksResult = await emitter.emitFilter('request.not_found', req, res);
+		const hooksResult = await emitter.emitFilter('request.not_found', { request: req, response: res });
 		if (hooksResult.reduce((prev, current) => current || prev, false)) {
 			return next();
 		}

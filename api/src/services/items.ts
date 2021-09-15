@@ -101,7 +101,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 			const hooksResult =
 				opts?.emitEvents !== false
 					? (
-							await emitter.emitFilter(`${this.eventScope}.create`, payload, {
+							await emitter.emitFilter(`${this.eventScope}.create`, {
 								accountability: this.accountability,
 								collection: this.collection,
 								item: null,
@@ -394,7 +394,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 		const hooksResult =
 			opts?.emitEvents !== false
 				? (
-						await emitter.emitFilter(`${this.eventScope}.update`, payload, {
+						await emitter.emitFilter(`${this.eventScope}.update`, {
 							accountability: this.accountability,
 							collection: this.collection,
 							item: keys,

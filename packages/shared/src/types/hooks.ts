@@ -1,15 +1,15 @@
 import { ApiExtensionContext } from './extensions';
 
-type FilterFunction = (event: string, handler: (...values: any[]) => any[]) => void;
-type ActionFunction = (event: string, handler: (...values: any[]) => void) => void;
-type InitFunction = (event: string, handler: (...values: any[]) => void) => void;
-type ScheduleFunction = (cron: string, handler: () => void) => void;
+type FilterHandler = (data?: Record<string, any>) => any | Promise<any>;
+type ActionHandler = (data?: Record<string, any>) => void | Promise<void>;
+type InitHandler = (data?: Record<string, any>) => void | Promise<void>;
+type ScheduleHandler = () => void | Promise<void>;
 
 type RegisterFunctions = {
-	filter: FilterFunction;
-	action: ActionFunction;
-	init: InitFunction;
-	schedule: ScheduleFunction;
+	filter: (event: string, handler: FilterHandler) => void;
+	action: (event: string, handler: ActionHandler) => void;
+	init: (event: string, handler: InitHandler) => void;
+	schedule: (cron: string, handler: ScheduleHandler) => void;
 };
 
 type HookHandlerFunction = (register: RegisterFunctions, context: ApiExtensionContext) => void;

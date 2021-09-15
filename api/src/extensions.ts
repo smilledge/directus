@@ -21,7 +21,7 @@ import emitter from './emitter';
 import env from './env';
 import * as exceptions from './exceptions';
 import logger from './logger';
-import { HookConfig, EndpointConfig } from './types';
+import { HookConfig, EndpointConfig, FilterHandler, ActionHandler, InitHandler, ScheduleHandler } from './types';
 import fse from 'fs-extra';
 import { getSchema } from './utils/get-schema';
 
@@ -164,16 +164,16 @@ function registerHooks(hooks: Extension[]) {
 		const register = getModuleDefault(hookInstance);
 
 		const registerFunctions = {
-			filter: (event: string, handler: (...values: any[]) => any[]) => {
+			filter: (event: string, handler: FilterHandler) => {
 				emitter.onFilter(event, handler);
 			},
-			action: (event: string, handler: (...values: any[]) => void) => {
+			action: (event: string, handler: ActionHandler) => {
 				emitter.onAction(event, handler);
 			},
-			init: (event: string, handler: (...values: any[]) => void) => {
+			init: (event: string, handler: InitHandler) => {
 				emitter.onInit(event, handler);
 			},
-			schedule: (cron: string, handler: () => void) => {
+			schedule: (cron: string, handler: ScheduleHandler) => {
 				if (validate(cron)) {
 					schedule(cron, handler);
 				} else {

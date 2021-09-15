@@ -15,16 +15,16 @@ export type ExtensionContext = {
 	getSchema: typeof getSchema;
 };
 
-type FilterFunction = (event: string, handler: (...values: any[]) => any[]) => void;
-type ActionFunction = (event: string, handler: (...values: any[]) => void) => void;
-type InitFunction = (event: string, handler: (...values: any[]) => void) => void;
-type ScheduleFunction = (cron: string, handler: () => void) => void;
+export type FilterHandler = (data?: Record<string, any>) => any | Promise<any>;
+export type ActionHandler = (data?: Record<string, any>) => void | Promise<void>;
+export type InitHandler = (data?: Record<string, any>) => void | Promise<void>;
+export type ScheduleHandler = () => void | Promise<void>;
 
 type RegisterFunctions = {
-	filter: FilterFunction;
-	action: ActionFunction;
-	init: InitFunction;
-	schedule: ScheduleFunction;
+	filter: (event: string, handler: FilterHandler) => void;
+	action: (event: string, handler: ActionHandler) => void;
+	init: (event: string, handler: InitHandler) => void;
+	schedule: (cron: string, handler: ScheduleHandler) => void;
 };
 
 type HookHandlerFunction = (register: RegisterFunctions, context: ExtensionContext) => void;

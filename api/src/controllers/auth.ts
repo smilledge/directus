@@ -284,7 +284,7 @@ router.get(
 
 		const hookPayload = req.session.grant.response;
 
-		await emitter.emitFilter(`oauth.${req.params.provider}.login`, hookPayload, {
+		await emitter.emitFilter(`oauth.${req.params.provider}.login`, {
 			schema: req.schema,
 			payload: hookPayload,
 			accountability: accountability,
@@ -293,7 +293,7 @@ router.get(
 		});
 
 		const emitStatus = (status: 'fail' | 'success') => {
-			emitter.emitAction(`oauth.${req.params.provider}.login`, hookPayload, {
+			emitter.emitAction(`oauth.${req.params.provider}.login`, {
 				schema: req.schema,
 				payload: hookPayload,
 				accountability: accountability,

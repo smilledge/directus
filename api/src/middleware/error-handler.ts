@@ -87,7 +87,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
 		}
 	}
 
-	emitter.emitAction('request.error', payload.errors).then(() => {
+	emitter.emitAction('request.error', { errors: payload.errors }).then(() => {
 		return res.json(payload);
 	});
 };

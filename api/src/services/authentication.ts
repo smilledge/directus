@@ -71,7 +71,7 @@ export class AuthenticationService {
 			.whereRaw('LOWER(??) = ?', ['email', email.toLowerCase()])
 			.first();
 
-		const updatedOptions = await emitter.emitFilter('auth.login', options, {
+		const updatedOptions = await emitter.emitFilter('auth.login', {
 			schema: this.schema,
 			payload: options,
 			accountability: this.accountability,
@@ -85,7 +85,7 @@ export class AuthenticationService {
 		}
 
 		const emitStatus = (status: 'fail' | 'success') => {
-			emitter.emitAction('auth.login', options, {
+			emitter.emitAction('auth.login', {
 				schema: this.schema,
 				payload: options,
 				accountability: this.accountability,
