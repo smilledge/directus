@@ -72,8 +72,6 @@ export class AuthenticationService {
 			.first();
 
 		const updatedOptions = await emitter.emitFilter('auth.login', options, {
-			event: 'auth.login',
-			action: 'login',
 			schema: this.schema,
 			payload: options,
 			accountability: this.accountability,
@@ -88,8 +86,6 @@ export class AuthenticationService {
 
 		const emitStatus = (status: 'fail' | 'success') => {
 			emitter.emitAction('auth.login', options, {
-				event: 'auth.login',
-				action: 'login',
 				schema: this.schema,
 				payload: options,
 				accountability: this.accountability,

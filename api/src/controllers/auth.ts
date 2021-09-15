@@ -245,8 +245,6 @@ router.get(
 		};
 
 		emitter.emitAction(`oauth.${req.params.provider}.redirect`, {
-			event: `oauth.${req.params.provider}.redirect`,
-			action: 'redirect',
 			schema: req.schema,
 			payload: hookPayload,
 			accountability: req.accountability,
@@ -254,8 +252,6 @@ router.get(
 		});
 
 		await emitter.emitFilter(`oauth.${req.params.provider}.redirect`, {
-			event: `oauth.${req.params.provider}.redirect`,
-			action: 'redirect',
 			schema: req.schema,
 			payload: hookPayload,
 			accountability: req.accountability,
@@ -289,8 +285,6 @@ router.get(
 		const hookPayload = req.session.grant.response;
 
 		await emitter.emitFilter(`oauth.${req.params.provider}.login`, hookPayload, {
-			event: `oauth.${req.params.provider}.login`,
-			action: 'oauth.login',
 			schema: req.schema,
 			payload: hookPayload,
 			accountability: accountability,
@@ -300,8 +294,6 @@ router.get(
 
 		const emitStatus = (status: 'fail' | 'success') => {
 			emitter.emitAction(`oauth.${req.params.provider}.login`, hookPayload, {
-				event: `oauth.${req.params.provider}.login`,
-				action: 'oauth.login',
 				schema: req.schema,
 				payload: hookPayload,
 				accountability: accountability,
