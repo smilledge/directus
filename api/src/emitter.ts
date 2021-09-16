@@ -1,9 +1,12 @@
 import { EventEmitter2 } from 'eventemitter2';
-import { isUndefined } from 'lodash';
+import { isUndefined, sortBy } from 'lodash';
 import logger from './logger';
-import { ActionHandler, FilterHandler, InitHandler } from './types';
+import { ActionHandler, FilterHandler, FilterOptions, InitHandler } from './types';
 
-type AsyncListener = <TValue>(payload: TValue, ...args: any[]) => Promise<TValue>;
+type AsyncListener = {
+	<TValue>(payload: TValue, ...args: any[]): Promise<TValue>;
+	order: number;
+};
 
 class Emitter {
 	private filterEmitter;
@@ -31,8 +34,9 @@ class Emitter {
 		...args: TArgs
 	): Promise<TValue> {
 		const listeners = this.filterEmitter.listeners(event) as AsyncListener[];
+		const orderedListeners = sortBy(listeners, (fn) => fn.order || 0);
 
-		return listeners.reduce(async (current, listener) => {
+		return orderedListeners.reduce(async (current, listener) => {
 			const result = await listener(await Promise.resolve(current), ...args);
 			return isUndefined(result) ? current : result;
 		}, Promise.resolve(payload));
@@ -56,7 +60,8 @@ class Emitter {
 		}
 	}
 
-	public onFilter(event: string, handler: FilterHandler): void {
+	public onFilter(event: string, handler: FilterHandler, options?: FilterOptions): void {
+		handler.order = options?.order;
 		this.filterEmitter.on(event, handler);
 	}
 

@@ -15,7 +15,15 @@ export type ExtensionContext = {
 	getSchema: typeof getSchema;
 };
 
-export type FilterHandler = (data?: Record<string, any>) => any | Promise<any>;
+export type FilterOptions = {
+	order?: number;
+};
+
+export type FilterHandler = {
+	(data?: Record<string, any>): any | Promise<any>;
+	order?: number;
+};
+
 export type ActionHandler = (data?: Record<string, any>) => void | Promise<void>;
 export type InitHandler = (data?: Record<string, any>) => void | Promise<void>;
 export type ScheduleHandler = () => void | Promise<void>;
