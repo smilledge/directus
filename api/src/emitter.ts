@@ -1,6 +1,9 @@
 import { EventEmitter2 } from 'eventemitter2';
+import { isUndefined } from 'lodash';
 import logger from './logger';
 import { ActionHandler, FilterHandler, InitHandler } from './types';
+
+type AsyncListener = <TValue>(payload: TValue, ...args: any[]) => Promise<TValue>;
 
 class Emitter {
 	private filterEmitter;
@@ -22,8 +25,17 @@ class Emitter {
 		this.initEmitter = new EventEmitter2(emitterOptions);
 	}
 
-	public async emitFilter(event: string, data?: Record<string, any>): Promise<any[]> {
-		return await this.filterEmitter.emitAsync(event, data);
+	public async emitFilter<TValue = any, TArgs extends any[] = any[]>(
+		event: string,
+		payload: TValue,
+		...args: TArgs
+	): Promise<TValue> {
+		const listeners = this.filterEmitter.listeners(event) as AsyncListener[];
+
+		return listeners.reduce(async (current, listener) => {
+			const result = await listener(await Promise.resolve(current), ...args);
+			return isUndefined(result) ? current : result;
+		}, Promise.resolve(payload));
 	}
 
 	public async emitAction(event: string, data?: Record<string, any>): Promise<void> {

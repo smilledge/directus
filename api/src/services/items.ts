@@ -98,24 +98,16 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 
 			// Run all hooks that are attached to this event so the end user has the chance to augment the
 			// item that is about to be saved
-			const hooksResult =
+			const payloadAfterHooks =
 				opts?.emitEvents !== false
-					? (
-							await emitter.emitFilter(`${this.eventScope}.create`, {
-								accountability: this.accountability,
-								collection: this.collection,
-								item: null,
-								payload,
-								schema: this.schema,
-								database: trx,
-							})
-					  ).filter((val) => val)
-					: [];
-
-			// The events are fired last-to-first based on when they were created. By reversing the
-			// output array of results, we ensure that the augmentations are applied in
-			// "chronological" order
-			const payloadAfterHooks = hooksResult.length > 0 ? hooksResult.reduce((val, acc) => merge(acc, val)) : payload;
+					? await emitter.emitFilter(`${this.eventScope}.create`, payload, {
+							accountability: this.accountability,
+							collection: this.collection,
+							item: null,
+							schema: this.schema,
+							database: trx,
+					  })
+					: payload;
 
 			const payloadWithPresets = this.accountability
 				? await authorizationService.validatePayload('create', this.collection, payloadAfterHooks)
@@ -391,24 +383,17 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 
 		// Run all hooks that are attached to this event so the end user has the chance to augment the
 		// item that is about to be saved
-		const hooksResult =
+		const payloadAfterHooks =
 			opts?.emitEvents !== false
-				? (
-						await emitter.emitFilter(`${this.eventScope}.update`, {
-							accountability: this.accountability,
-							collection: this.collection,
-							item: keys,
-							payload,
-							schema: this.schema,
-							database: this.knex,
-						})
-				  ).filter((val) => val)
-				: [];
-
-		// The events are fired last-to-first based on when they were created. By reversing the
-		// output array of results, we ensure that the augmentations are applied in
-		// "chronological" order
-		const payloadAfterHooks = hooksResult.length > 0 ? hooksResult.reduce((val, acc) => merge(acc, val)) : payload;
+				? await emitter.emitFilter(`${this.eventScope}.update`, {
+						accountability: this.accountability,
+						collection: this.collection,
+						item: keys,
+						payload,
+						schema: this.schema,
+						database: this.knex,
+				  })
+				: payload;
 
 		if (this.accountability) {
 			await authorizationService.checkAccess('update', this.collection, keys);
