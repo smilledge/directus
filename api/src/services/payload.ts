@@ -1,7 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import Joi from 'joi';
 import { Knex } from 'knex';
-import { clone, cloneDeep, isObject, isPlainObject, omit, isNil } from 'lodash';
+import { clone, cloneDeep, isObject, isPlainObject, omit, isNil, omitBy, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import getDatabase from '../database';
 import { ForbiddenException, InvalidPayloadException } from '../exceptions';
@@ -675,8 +675,10 @@ export class PayloadService {
 	 * Transforms the input partial payload to match the output structure, to have consistency
 	 * between delta and data
 	 */
-	async prepareDelta(data: Partial<Item>): Promise<string> {
-		let payload = cloneDeep(data);
+	async prepareDelta(data: Partial<Item>): Promise<Partial<Item>> {
+		const revisionScope = this.schema.collections[this.collection].revisionScope;
+		const isTracked = (key: string) => !revisionScope || revisionScope.includes(key);
+		let payload = pickBy(cloneDeep(data), (_, key) => isTracked(key));
 
 		for (const key in payload) {
 			if (payload[key]?.isRawInstance) {
@@ -686,6 +688,6 @@ export class PayloadService {
 
 		payload = await this.processValues('read', payload);
 
-		return JSON.stringify(payload);
+		return payload;
 	}
 }

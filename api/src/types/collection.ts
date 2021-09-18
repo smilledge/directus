@@ -10,6 +10,7 @@ export type CollectionMeta = {
 	translations: Record<string, string>;
 	item_duplication_fields: string[] | null;
 	accountability: 'all' | 'accountability' | null;
+	revision_scope: string[] | null;
 };
 
 export type Collection = {

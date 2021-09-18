@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { clone, cloneDeep, merge, pick, without } from 'lodash';
+import { clone, cloneDeep, isEmpty, merge, pick, without } from 'lodash';
 import { getCache } from '../cache';
 import Keyv from 'keyv';
 import getDatabase from '../database';
@@ -164,29 +164,33 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 					item: primaryKey,
 				};
 
-				const activityID = (await trx.insert(activityRecord).into('directus_activity').returning('id'))[0] as number;
+				const [activityID] = await trx.insert(activityRecord).into('directus_activity').returning<number[]>('id');
 
 				// If revisions are tracked, create revisions record
 				if (this.schema.collections[this.collection].accountability === 'all') {
-					const revisionRecord = {
-						activity: activityID,
-						collection: this.collection,
-						item: primaryKey,
-						data: await payloadService.prepareDelta(payload),
-						delta: await payloadService.prepareDelta(payload),
-					};
+					const delta = await payloadService.prepareDelta(payload);
 
-					const revisionID = (await trx.insert(revisionRecord).into('directus_revisions').returning('id'))[0] as number;
+					if (!isEmpty(delta)) {
+						const revisionRecord = {
+							activity: activityID,
+							collection: this.collection,
+							item: primaryKey,
+							data: JSON.stringify(delta),
+							delta: JSON.stringify(delta),
+						};
 
-					// Make sure to set the parent field of the child-revision rows
-					const childrenRevisions = [...revisionsM2O, ...revisionsA2O, ...revisionsO2M];
+						const [revisionID] = await trx.insert(revisionRecord).into('directus_revisions').returning<number[]>('id');
 
-					if (childrenRevisions.length > 0) {
-						await trx('directus_revisions').update({ parent: revisionID }).whereIn('id', childrenRevisions);
-					}
+						// Make sure to set the parent field of the child-revision rows
+						const childrenRevisions = [...revisionsM2O, ...revisionsA2O, ...revisionsO2M];
 
-					if (opts?.onRevisionCreate) {
-						opts.onRevisionCreate(revisionID);
+						if (childrenRevisions.length > 0) {
+							await trx('directus_revisions').update({ parent: revisionID }).whereIn('id', childrenRevisions);
+						}
+
+						if (opts?.onRevisionCreate) {
+							opts.onRevisionCreate(revisionID);
+						}
 					}
 				}
 			}
@@ -489,12 +493,17 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 					}[] = [];
 
 					for (let i = 0; i < activityPrimaryKeys.length; i++) {
+						const delta = await payloadService.prepareDelta(payloadWithTypeCasting);
+						if (isEmpty(delta)) {
+							continue;
+						}
+
 						revisionRecords.push({
 							activity: activityPrimaryKeys[i],
 							collection: this.collection,
 							item: keys[i],
 							data: snapshots && Array.isArray(snapshots) ? JSON.stringify(snapshots[i]) : JSON.stringify(snapshots),
-							delta: await payloadService.prepareDelta(payloadWithTypeCasting),
+							delta: JSON.stringify(delta),
 						});
 					}
 

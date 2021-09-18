@@ -180,6 +180,19 @@ fields:
           value: null
     width: half
 
+  - field: revision_scope
+    special:
+      - json
+    interface: system-field-tree
+    conditions:
+      - name: Hidden when revisions disabled
+        rule:
+          accountability:
+            _neq: all
+        hidden: true
+    options:
+      collectionField: collection
+
   - field: duplication_divider
     special:
       - alias

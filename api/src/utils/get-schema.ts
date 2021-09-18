@@ -110,7 +110,7 @@ async function getDatabaseSchema(
 
 	const collections = [
 		...(await database
-			.select('collection', 'singleton', 'note', 'sort_field', 'accountability')
+			.select('collection', 'singleton', 'note', 'sort_field', 'accountability', 'revision_scope')
 			.from('directus_collections')),
 		...systemCollectionRows,
 	];
@@ -141,6 +141,7 @@ async function getDatabaseSchema(
 			note: collectionMeta?.note || null,
 			sortField: collectionMeta?.sort_field || null,
 			accountability: collectionMeta ? collectionMeta.accountability : 'all',
+			revisionScope: collectionMeta?.revision_scope || null,
 			fields: mapValues(schemaOverview[collection].columns, (column) => ({
 				field: column.column_name,
 				defaultValue: getDefaultValue(column) ?? null,

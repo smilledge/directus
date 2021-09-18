@@ -23,6 +23,7 @@ export type CollectionsOverview = {
 		sortField: string | null;
 		note: string | null;
 		accountability: 'all' | 'activity' | null;
+		revisionScope: string[] | null;
 		fields: {
 			[name: string]: FieldOverview;
 		};
