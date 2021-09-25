@@ -49,6 +49,10 @@ export default defineComponent({
 			type: Boolean,
 			default: false,
 		},
+		depth: {
+			type: Number,
+			default: 3,
+		},
 	},
 	emits: ['input'],
 	setup(props) {
@@ -58,7 +62,7 @@ export default defineComponent({
 
 		const chosenCollection = computed(() => values.value[props.collectionField] || props.collection);
 
-		const { tree } = useFieldTree(chosenCollection);
+		const { tree } = useFieldTree(chosenCollection, undefined, undefined, undefined, props.depth);
 
 		return { t, values, tree, chosenCollection };
 	},

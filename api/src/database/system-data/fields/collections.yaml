@@ -192,6 +192,7 @@ fields:
         hidden: true
     options:
       collectionField: collection
+      depth: 0
 
   - field: duplication_divider
     special:
@@ -208,3 +209,4 @@ fields:
     interface: system-field-tree
     options:
       collectionField: collection
+      depth: 3
