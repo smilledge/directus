@@ -81,7 +81,7 @@ module.exports = function registerHook({ exceptions }) {
 | `routes.init`        | `before` and `after`                                               | No               |
 | `routes.custom.init` | `before` and `after`                                               | No               |
 | `middlewares.init`   | `before` and `after`                                               | No               |
-| `request`            | `not_found`                                                        | No               |
+| `request`            | `authenticate` and `not_found`                                     | No               |
 | `response`           |                                                                    | No<sup>[1]</sup> |
 | `database.error`     | When a database error is thrown                                    | No               |
 | `error`              |                                                                    | No               |

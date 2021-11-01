@@ -1,6 +1,8 @@
 import { RequestHandler } from 'express';
 import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { merge } from 'lodash';
 import getDatabase from '../database';
+import emitter from '../emitter';
 import env from '../env';
 import { InvalidCredentialsException } from '../exceptions';
 import asyncHandler from '../utils/async-handler';
@@ -19,7 +21,27 @@ const authenticate: RequestHandler = asyncHandler(async (req, res, next) => {
 		userAgent: req.get('user-agent'),
 	};
 
-	if (!req.token) return next();
+	const emitAccountability = async () => {
+		const hooksResult = await emitter.emitAsync('request.authenticate', req.accountability, {
+			req,
+			res,
+			event: 'request.authenticate',
+			action: 'authenticate',
+			payload: req.accountability,
+			accountability: req.accountability,
+			user: req.accountability?.user,
+			database: getDatabase(),
+		});
+
+		if (hooksResult.length) {
+			req.accountability = merge(req.accountability, ...hooksResult);
+		}
+	};
+
+	if (!req.token) {
+		await emitAccountability();
+		return next();
+	}
 
 	const database = getDatabase();
 
@@ -77,6 +99,8 @@ const authenticate: RequestHandler = asyncHandler(async (req, res, next) => {
 		req.accountability.admin = user.admin_access === true || user.admin_access == 1;
 		req.accountability.app = user.app_access === true || user.app_access == 1;
 	}
+
+	await emitAccountability();
 
 	return next();
 });
